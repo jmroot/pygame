@@ -13,6 +13,15 @@ tar xzf ${FSYNTH}.tar.gz
 cd $FSYNTH
 mkdir build
 cd build
-cmake .. -Denable-readline=OFF
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    cmake .. -Denable-readline=OFF
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${FSYNTH}
+    cmake -DCMAKE_INSTALL_PREFIX=${MACDEP_CACHE_PREFIX_PATH}/${FSYNTH} .. -Denable-readline=OFF
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${FSYNTH}/. /usr/local
+fi

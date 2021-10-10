@@ -20,7 +20,6 @@ curl -sL https://www.libsdl.org/projects/SDL_mixer/release/${MIX2}.tar.gz > ${MI
 sha512sum -c sdl2.sha512
 
 
-
 # Build SDL
 tar xzf ${SDL2}.tar.gz
 
@@ -28,9 +27,18 @@ tar xzf ${SDL2}.tar.gz
 # mv SDL-* ${SDL2}
 
 cd $SDL2
-./configure --disable-video-vulkan
-make
-make install
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --disable-video-vulkan
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${SDL2}
+    ./configure --disable-video-vulkan --prefix=${MACDEP_CACHE_PREFIX_PATH}/${SDL2}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${SDL2}/. /usr/local
+fi
+
 cd ..
 
 
@@ -41,27 +49,39 @@ cd $IMG2
 # dlopen-ing the library itself. This is important for when auditwheel moves
 # libraries into the wheel.
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      # linux
-      export SDL_IMAGE_CONFIGURE=
+    ./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
+        --enable-tif --disable-tif-shared --enable-webp --disable-webp-shared
+    make
+    make install
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-      # Mac OSX
-      # --disable-imageio is so it doesn't use the built in mac image loading.
-      #     Since it is not as compatible with some jpg/png files.
-      export SDL_IMAGE_CONFIGURE=--disable-imageio
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${IMG2}
+    ./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
+            --enable-tif --disable-tif-shared --enable-webp --disable-webp-shared \
+            --prefix=${MACDEP_CACHE_PREFIX_PATH}/${IMG2} \
+            --disable-imageio # this flag is only on mac
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${IMG2}/. /usr/local
 fi
 
-./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
-        --enable-tif --disable-tif-shared --enable-webp --disable-webp-shared $SDL_IMAGE_CONFIGURE
-make
-make install
 cd ..
 
 # Build SDL_ttf
 tar xzf ${TTF2}.tar.gz
 cd $TTF2
-./configure
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${TTF2}
+    ./configure --prefix=${MACDEP_CACHE_PREFIX_PATH}/${TTF2}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${TTF2}/. /usr/local
+fi
+
 cd ..
 
 
@@ -71,7 +91,28 @@ cd $MIX2
 # The --disable-x-shared flags make it use standard dynamic linking rather than
 # dlopen-ing the library itself. This is important for when auditwheel moves
 # libraries into the wheel.
-./configure \
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure \
+      --disable-dependency-tracking \
+      --disable-music-flac-shared \
+      --disable-music-midi-fluidsynth \
+      --disable-music-midi-fluidsynth-shared \
+      --disable-music-mod-mikmod-shared \
+      --disable-music-mod-modplug-shared \
+      --disable-music-mp3-mpg123-shared \
+      --disable-music-ogg-shared \
+      --enable-music-mod-mikmod \
+      --enable-music-mod-modplug \
+      --enable-music-ogg \
+      --enable-music-flac \
+      --enable-music-mp3 \
+      --enable-music-mp3-mpg123 \
+      --enable-music-mod
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${MIX2}
+    ./configure \
       --disable-dependency-tracking \
       --disable-music-flac-shared \
       --disable-music-midi-fluidsynth \
@@ -87,7 +128,10 @@ cd $MIX2
       --enable-music-mp3 \
       --enable-music-mp3-mpg123 \
       --enable-music-mod \
+      --prefix=${MACDEP_CACHE_PREFIX_PATH}/${MIX2}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${MIX2}/. /usr/local
+fi
 
-make
-make install
 cd ..

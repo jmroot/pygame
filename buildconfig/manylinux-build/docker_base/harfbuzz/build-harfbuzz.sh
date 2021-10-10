@@ -11,7 +11,13 @@ sha512sum -c harfbuzz.sha512
 unxz -xf ${HARFBUZZ_NAME}.tar.xz
 tar -xf ${HARFBUZZ_NAME}.tar
 cd ${HARFBUZZ_NAME}
-# To avoid a circular dependency on freetype
-./configure --with-freetype=no --with-fontconfig=no
-make
-make install
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # To avoid a circular dependency on freetype
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${HARFBUZZ_NAME}
+    ./configure --with-freetype=no --with-fontconfig=no \
+        --prefix=${MACDEP_CACHE_PREFIX_PATH}/${HARFBUZZ_NAME}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${HARFBUZZ_NAME}/. /usr/local
+fi

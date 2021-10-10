@@ -12,6 +12,16 @@ sha512sum -c flac.sha512
 unxz ${FLAC}.tar.xz
 tar xf ${FLAC}.tar
 cd $FLAC
-./configure
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${FLAC}
+    ./configure --prefix=${MACDEP_CACHE_PREFIX_PATH}/${FLAC}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${FLAC} /usr/local
+fi
+

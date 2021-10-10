@@ -10,7 +10,16 @@ sha512sum -c tiff.sha512
 
 tar xzf ${TIFF}.tar.gz
 cd $TIFF
-./configure --disable-lzma --disable-webp --disable-zstd
 
-make
-make install
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --disable-lzma --disable-webp --disable-zstd
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${TIFF}
+    ./configure --disable-lzma --disable-webp --disable-zstd \
+         --prefix=${MACDEP_CACHE_PREFIX_PATH}/${TIFF}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${TIFF}/. /usr/local
+fi

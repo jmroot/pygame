@@ -13,6 +13,15 @@ if [ ! -d $FREETYPE ]; then
 	tar xzf ${FREETYPE}.tar.gz
 fi
 cd $FREETYPE
-./configure $EXTRA_CONFIG_FREETYPE
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure $EXTRA_CONFIG_FREETYPE
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${FREETYPE}
+    ./configure $EXTRA_CONFIG_FREETYPE --prefix=${MACDEP_CACHE_PREFIX_PATH}/${FREETYPE}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${FREETYPE}/. /usr/local
+fi

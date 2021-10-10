@@ -15,6 +15,7 @@ export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 export MAKEFLAGS="-j 4"
 export MACOSX_DEPLOYMENT_TARGET=10.9
 
+mkdir $MACDEP_CACHE_PREFIX_PATH
 
 # First clean up some homebrew stuff we don't want linked in
 # ----------------------------------------------------------
@@ -91,5 +92,3 @@ bash sdl_libs/build-sdl2-libs.sh
 
 # for pygame.midi
 bash portmidi/build-portmidi.sh
-# strangely somehow the built pygame links against the libportmidi.dylib here:
-cp /usr/local/lib/libportmidi.dylib /Users/runner/work/pygame/pygame/libportmidi.dylib

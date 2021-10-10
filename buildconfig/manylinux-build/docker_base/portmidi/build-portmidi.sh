@@ -3,7 +3,8 @@ set -e -x
 
 cd $(dirname `readlink -f "$0"`)
 
-SRC_ZIP="portmidi-src-217.zip"
+PORTMIDI="portmidi-src-217"
+SRC_ZIP="${PORTMIDI}.zip"
 
 curl -sL http://downloads.sourceforge.net/project/portmedia/portmidi/217/${SRC_ZIP} > ${SRC_ZIP}
 sha512sum -c portmidi.sha512
@@ -28,6 +29,16 @@ patch -p1 < ../mac.patch
 #cmake -DJAVA_JVM_LIBRARY=${JAVA_HOME}/jre/lib/${JRE_LIB_DIR}/server/libjvm.so .
 mkdir buildportmidi
 cd buildportmidi
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${PORTMIDI}
+    cmake -DCMAKE_INSTALL_PREFIX=${MACDEP_CACHE_PREFIX_PATH}/${PORTMIDI} \
+        -DCMAKE_BUILD_TYPE=Release ..
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${PORTMIDI}/. /usr/local
+fi

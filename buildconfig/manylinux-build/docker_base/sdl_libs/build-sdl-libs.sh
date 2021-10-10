@@ -18,9 +18,20 @@ sha512sum -c sdl.sha512
 # Build SDL
 tar xzf ${SDL}.tar.gz
 cd $SDL
-./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${SDL}
+    ./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
+        --prefix=${MACDEP_CACHE_PREFIX_PATH}/${SDL}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${SDL}/. /usr/local
+fi
+
 cd ..
 
 # Link sdl-config into /usr/bin so that smpeg-config can find it
@@ -34,9 +45,21 @@ find release_0_4_5 -not -iwholename '*.svn*' -exec sha512sum {} + | awk '{print 
 
 cd release_0_4_5
 ./autogen.sh
-./configure --disable-dependency-tracking --disable-debug --disable-gtk-player --disable-gtktest --disable-opengl-player --disable-sdltest
-make
-make install
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --disable-dependency-tracking --disable-debug --disable-gtk-player \
+        --disable-gtktest --disable-opengl-player --disable-sdltest
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/smpeg
+    ./configure --disable-dependency-tracking --disable-debug --disable-gtk-player \
+        --disable-gtktest --disable-opengl-player --disable-sdltest \
+        --prefix=${MACDEP_CACHE_PREFIX_PATH}/smpeg
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/smpeg/. /usr/local
+fi
+
 cd ..
 
 # Build SDL_image
@@ -45,18 +68,39 @@ cd $IMG
 # The --disable-x-shared flags make it use standard dynamic linking rather than
 # dlopen-ing the library itself. This is important for when auditwheel moves
 # libraries into the wheel.
-./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
         --enable-tif --disable-tif-shared --enable-webp --disable-webp-shared
-make
-make install
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${IMG}
+    ./configure --enable-png --disable-png-shared --enable-jpg --disable-jpg-shared \
+        --enable-tif --disable-tif-shared --enable-webp --disable-webp-shared \
+        --prefix=${MACDEP_CACHE_PREFIX_PATH}/${IMG}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${IMG}/. /usr/local
+fi
+
 cd ..
 
 # Build SDL_ttf
 tar xzf ${TTF}.tar.gz
 cd $TTF
-./configure
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${TTF}
+    ./configure --prefix=${MACDEP_CACHE_PREFIX_PATH}/${TTF}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${TTF}/. /usr/local
+fi
+
 cd ..
 
 # Build SDL_mixer
@@ -65,11 +109,25 @@ cd $MIX
 # The --disable-x-shared flags make it use standard dynamic linking rather than
 # dlopen-ing the library itself. This is important for when auditwheel moves
 # libraries into the wheel.
-./configure --enable-music-mod --disable-music-mod-shared \
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --enable-music-mod --disable-music-mod-shared \
             --enable-music-fluidsynth --disable-music-fluidsynth-shared \
-            --enable-music-ogg  --disable-music-ogg-shared \
-            --enable-music-flac  --disable-music-flac-shared \
-            --enable-music-mp3  --disable-music-mp3-shared
-make
-make install
+            --enable-music-ogg --disable-music-ogg-shared \
+            --enable-music-flac --disable-music-flac-shared \
+            --enable-music-mp3 --disable-music-mp3-shared
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${MIX}
+    ./configure --enable-music-mod --disable-music-mod-shared \
+            --enable-music-fluidsynth --disable-music-fluidsynth-shared \
+            --enable-music-ogg --disable-music-ogg-shared \
+            --enable-music-flac --disable-music-flac-shared \
+            --enable-music-mp3 --disable-music-mp3-shared \
+            --prefix=${MACDEP_CACHE_PREFIX_PATH}/${MIX}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${MIX}/. /usr/local
+fi
+
 cd ..

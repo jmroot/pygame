@@ -11,6 +11,15 @@ sha512sum -c glib.sha512
 unxz ${GLIB}.tar.xz
 tar xzf ${GLIB}.tar
 cd $GLIB
-./configure --with-pcre=internal
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure --with-pcre=internal
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${GLIB}
+    ./configure --with-pcre=internal --prefix=${MACDEP_CACHE_PREFIX_PATH}/${GLIB}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${GLIB}/. /usr/local
+fi

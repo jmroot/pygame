@@ -10,6 +10,15 @@ curl -sL https://sourceforge.net/projects/modplug-xmms/files/libmodplug/${MODPLU
 sha512sum -c libmodplug.sha512
 tar -xf ${MODPLUG_NAME}.tar.gz
 cd ${MODPLUG_NAME}
-./configure
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${MODPLUG_NAME}
+    ./configure--prefix=${MACDEP_CACHE_PREFIX_PATH}/${MODPLUG_NAME}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${MODPLUG_NAME}/. /usr/local
+fi

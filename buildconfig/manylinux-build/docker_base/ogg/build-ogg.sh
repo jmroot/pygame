@@ -12,14 +12,33 @@ sha512sum -c ogg.sha512
 
 tar xzf ${OGG}.tar.gz
 cd $OGG
-./configure
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${OGG}
+    ./configure --prefix=${MACDEP_CACHE_PREFIX_PATH}/${OGG}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${OGG}/. /usr/local
+fi
+
 cd ..
 
 tar xzf ${VORBIS}.tar.gz
 cd $VORBIS
-./configure
-make
-make install
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${VORBIS}
+    ./configure --prefix=${MACDEP_CACHE_PREFIX_PATH}/${VORBIS}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${VORBIS}/. /usr/local
+fi
+
 cd ..

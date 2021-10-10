@@ -10,6 +10,16 @@ sha512sum -c webp.sha512
 
 tar xzf ${WEBP}.tar.gz
 cd $WEBP
-./configure
-make
-make install
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./configure
+    make
+    make install
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    mkdir ${MACDEP_CACHE_PREFIX_PATH}/${WEBP}
+    ./configure --prefix=${MACDEP_CACHE_PREFIX_PATH}/${WEBP}
+    make
+    make install
+    sudo cp -dR --preserve=mode,ownership ${MACDEP_CACHE_PREFIX_PATH}/${WEBP}/. /usr/local
+fi
+
